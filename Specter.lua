@@ -1,6 +1,6 @@
 --[[
-    SPECTER X PREMIUM (SILENT AIM + ESP)
-    Official Release: Fully integrated with Key System, ESP, Trackers, and Mobile UI fixes.
+    SPECTER X PREMIUM (SAFE LOADSTRING VERSION)
+    Anti-Crash & Anti-Nil protection added for all mobile executors.
 ]]
 
 local Players = game:GetService("Players")
@@ -44,19 +44,21 @@ local MainFrame = Instance.new("Frame")
 local function StartCheat()
     MainFrame.Visible = true
     
-    -- FOV Drawing Setup
+    -- Safe Drawing Library Check
     local fovCircle = nil
     local drawingSuccess, drawingLib = pcall(function() return Drawing end)
 
-    if drawingSuccess and drawingLib then
-        local c = drawingLib.new("Circle")
-        c.Color = Config.FOVColor
-        c.Thickness = 1.5
-        c.NumSides = 64
-        c.Radius = Config.FOVRadius
-        c.Filled = false
-        c.Visible = Config.ShowFOV
-        fovCircle = c
+    if drawingSuccess and drawingLib and type(drawingLib) == "table" and drawingLib.new then
+        pcall(function()
+            local c = drawingLib.new("Circle")
+            c.Color = Config.FOVColor
+            c.Thickness = 1.5
+            c.NumSides = 64
+            c.Radius = Config.FOVRadius
+            c.Filled = false
+            c.Visible = Config.ShowFOV
+            fovCircle = c
+        end)
     end
 
     if fovCircle then
@@ -125,8 +127,8 @@ local function StartCheat()
     if rsm and rsm:FindFirstChild("GunModules") and rsm.GunModules:FindFirstChild("BulletHandler") then
         BulletHandlerModule = require(rsm.GunModules.BulletHandler)
     elseif type(getloadedmodules) == "function" then
-        for _, mod in ipairs(getloadedmodules()) do
-            if mod.Name == "BulletHandler" then BulletHandlerModule = require(mod) break end
+        for _, mod in pcall(getloadedmodules) do
+            if type(mod) == "table" and mod.Name == "BulletHandler" then BulletHandlerModule = require(mod) break end
         end
     end
 
@@ -146,19 +148,24 @@ local function StartCheat()
         end
     end
 
-    -- // ADVANCED ESP SYSTEM
-    if drawingSuccess and drawingLib then
+    -- // ADVANCED ESP SYSTEM (PROTECTED)
+    if drawingSuccess and drawingLib and type(drawingLib) == "table" and drawingLib.new then
         local function CreateESP(player)
-            local Box = drawingLib.new("Square")
-            Box.Thickness = 1.5
-            Box.Filled = false
-            Box.Color = Config.ESP_Color
-            Box.Visible = false
+            local Box, Tracer
+            pcall(function()
+                Box = drawingLib.new("Square")
+                Box.Thickness = 1.5
+                Box.Filled = false
+                Box.Color = Config.ESP_Color
+                Box.Visible = false
 
-            local Tracer = drawingLib.new("Line")
-            Tracer.Thickness = 1.5
-            Tracer.Color = Config.ESP_Color
-            Tracer.Visible = false
+                Tracer = drawingLib.new("Line")
+                Tracer.Thickness = 1.5
+                Tracer.Color = Config.ESP_Color
+                Tracer.Visible = false
+            end)
+
+            if not Box or not Tracer then return end
 
             local updater
             updater = RunService.RenderStepped:Connect(function()
@@ -167,7 +174,6 @@ local function StartCheat()
                     local screenPos, onScreen = camera:WorldToViewportPoint(hrp.Position)
                     
                     if onScreen then
-                        -- Box ESP
                         if Config.ESP_Box then
                             local scale = 1000 / screenPos.Z
                             Box.Size = Vector2.new(scale * 1.5, scale * 2)
@@ -178,7 +184,6 @@ local function StartCheat()
                             Box.Visible = false
                         end
 
-                        -- Tracer ESP
                         if Config.ESP_Tracer then
                             local viewportSize = camera.ViewportSize
                             if Config.Tracer_Origin == "Bottom" then
@@ -200,8 +205,7 @@ local function StartCheat()
                     Box.Visible = false
                     Tracer.Visible = false
                     if not Players:FindFirstChild(player.Name) then
-                        Box:Remove()
-                        Tracer:Remove()
+                        pcall(function() Box:Remove() Tracer:Remove() end)
                         updater:Disconnect()
                     end
                 end
@@ -279,13 +283,22 @@ ckCorner.CornerRadius = UDim.new(0, 6)
 ckCorner.Parent = CheckKeyBtn
 
 GetKeyBtn.MouseButton1Click:Connect(function()
-    if setclipboard then
-        setclipboard(KeyLink)
+    local success = pcall(function()
+        if setclipboard then
+            setclipboard(KeyLink)
+        elseif toclipboard then
+            toclipboard(KeyLink)
+        else
+            error()
+        end
+    end)
+    if success then
         GetKeyBtn.Text = "Copied Link!"
         task.wait(2)
         GetKeyBtn.Text = "Get Key (Copy)"
     else
-        GetKeyBtn.Text = "Unsupported Exec"
+        GetKeyBtn.Text = "Link in Chat/Log"
+        print("SPECTER X KEY LINK: " .. KeyLink)
     end
 end)
 
@@ -301,7 +314,6 @@ CheckKeyBtn.MouseButton1Click:Connect(function()
         CheckKeyBtn.Text = "Check Key"
     end
 end)
-
 
 -- // 2. SPECTER X MAIN PANEL
 MainFrame.Name = "MainFrame"
@@ -341,7 +353,6 @@ UIListLayout.Parent = ScrollFrame
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Padding = UDim.new(0, 10)
 
--- UI Helper Functions
 local function createToggle(name, default, callback)
     local ToggleBg = Instance.new("Frame")
     ToggleBg.Parent = ScrollFrame
@@ -450,5 +461,44 @@ end
 
 -- // RENDER MENU ELEMENTS
 createToggle("Silent Aim", Config.SilentAim, function(v) Config.SilentAim = v end)
-createToggle("Show FOV Circle", Config.ShowFOV, function(v) Config.ShowFOV
-    
+createToggle("Show FOV Circle", Config.ShowFOV, function(v) Config.ShowFOV = v end)
+createSlider("FOV Radius", 50, 600, Config.FOVRadius, function(v) Config.FOVRadius = v end)
+
+createToggle("Player Box ESP", Config.ESP_Box, function(v) Config.ESP_Box = v end)
+createToggle("Player Tracer ESP", Config.ESP_Tracer, function(v) Config.ESP_Tracer = v end)
+
+createToggle("Tracers Center/Bottom", false, function(v)
+    Config.Tracer_Origin = v and "Center" or "Bottom"
+end)
+
+-- // 3. FLOATING SCREEN TOGGLE BUTTON
+local MenuToggleButton = Instance.new("TextButton")
+MenuToggleButton.Name = "SpecterXToggleButton"
+MenuToggleButton.Parent = ScreenGui
+MenuToggleButton.Size = UDim2.new(0, 50, 0, 50)
+MenuToggleButton.Position = UDim2.new(0, 15, 0.4, 0) 
+MenuToggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
+MenuToggleButton.Font = Enum.Font.GothamBold
+MenuToggleButton.Text = "MENU"
+MenuToggleButton.TextColor3 = Config.FOVColor
+MenuToggleButton.TextSize = 11
+MenuToggleButton.Active = true
+MenuToggleButton.Draggable = true 
+
+local mtbCorner = Instance.new("UICorner")
+mtbCorner.CornerRadius = UDim.new(0, 25) 
+mtbCorner.Parent = MenuToggleButton
+
+MenuToggleButton.MouseButton1Click:Connect(function()
+    if not ScreenGui:FindFirstChild("KeyFrame") then
+        MainFrame.Visible = not MainFrame.Visible
+    end
+end)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.U then
+        if not ScreenGui:FindFirstChild("KeyFrame") then
+            MainFrame.Visible = not MainFrame.Visible
+        end
+    end
+end)
