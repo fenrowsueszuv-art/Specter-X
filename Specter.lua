@@ -1,7 +1,7 @@
---[[
-    SPECTER X PREMIUM (SAFE LOADSTRING VERSION)
-    Anti-Crash & Anti-Nil protection added for all mobile executors.
-]]
+-- [[
+-- SPECTER X PREMIUM (SAFE LOADSTRING VERSION)
+-- Anti-Crash & Anti-Nil protection added for all mobile executors.
+-- ]]
 
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
@@ -30,7 +30,8 @@ local Config = {
 
 -- Key System Data
 local TargetKey = "script-beta2U9YPLGP8"
-local KeyLink = "https://link-hub.net/6168331/D18iRW4Y2Yj3"
+-- YENİ PREMIUM LINK ENTEGRE EDİLDİ
+local KeyLink = "https://work.ink/2CXm/specter-x-premium"
 
 local isAlive = false
 local ScreenGui = Instance.new("ScreenGui")
