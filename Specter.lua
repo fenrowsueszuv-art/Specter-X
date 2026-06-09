@@ -28,10 +28,9 @@ local Config = {
     Tracer_Origin = "Bottom"
 }
 
--- Key System Data
-local TargetKey = "script-beta2U9YPLGP8"
--- YENİ PREMIUM LINK ENTEGRE EDİLDİ
-local KeyLink = "https://work.ink/2CXm/specter-x-premium"
+-- Key System Data (GÜNCELLENDİ)
+local TargetKey = "57450894362176735-beta"
+local KeyLink = "https://loot-link.com/s?jNgcxhwz"
 
 local isAlive = false
 local ScreenGui = Instance.new("ScreenGui")
